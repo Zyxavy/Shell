@@ -1,8 +1,14 @@
 #include "main.h"
 
 #define LSH_RL_BUFSIZE 1024 //1kb of buffer size
+#define LSH_TOK_BUFSIZE 62 //token size of 64bytes
+#define LSH_TOK_DELIM " \t\r\n\a" //delimiters for tokenizing, passed into strtok to tell which separate tokens
 
-void lsh_loop(void);
+//Function Declarations
+void lshLoop(void);
+char *lshReadLine(void);
+char **lshSplitLine(char *line);
+
 
 int main(int argc, char **argv)
 {
@@ -10,13 +16,13 @@ int main(int argc, char **argv)
 
 
     //Run command loop
-    lsh_loop();
+    lshLoop();
 
     //Shutdown and Cleanup
     return EXIT_SUCCESS;
 }
 
-void lsh_loop(void)
+void lshLoop(void)
 {
     //declare variables
     char *line;
@@ -26,9 +32,9 @@ void lsh_loop(void)
     do
     {
         printf(">> "); //prompt
-        line = lshReadLine(); //call a function to read a line
-        args = lshSplitLine(line); //split the line into arguments
-        status - lshExecute(args); //execute the arguments
+        //line = lshReadLine(); //call a function to read a line
+        //args = lshSplitLine(line); //split the line into arguments
+        //status - lshExecute(args); //execute the arguments
 
         //free memory
         free(line);
@@ -79,6 +85,48 @@ char *lshReadLine(void)
         }
     }
 }
+
+char **lshSplitLine(char *line) //returns a pointer to an array of char* pointers(an array of strings)
+{
+    int bufferSize = LSH_TOK_BUFSIZE, position = 0; 
+    char **tokens = malloc(bufferSize * sizeof(*tokens));//allocate memory for tokens array
+    char *token, *saveptr; //temporary variable to hold each token
+
+    if(!tokens)
+    {
+        fprintf(stderr, "lsh: Allocation Error!\n");
+        exit(EXIT_FAILURE);
+    }
+
+    token = strtok_r(line, LSH_TOK_DELIM, &saveptr); //scans the line and returns the first sequence of char that does not contain the delimeters
+    while(token != NULL) //while there are tokens
+    {
+        tokens[position] = token; //store token to the array
+        position++;
+
+        if(position >= bufferSize) //if next position exceeds bufferSize, reallocate
+        {
+            bufferSize += LSH_TOK_BUFSIZE;
+            char **temp = realloc(tokens, bufferSize * sizeof(char*)); 
+
+            if(!temp) //if realloc fails, tokens will still point to the old block
+            {
+                free(tokens);
+                fprintf(stderr, "lsh: Allocation Error!\n");
+                exit(EXIT_FAILURE);
+            }
+            
+            tokens = temp;
+        
+        }
+
+        token = strtok_r(NULL, LSH_TOK_DELIM, &saveptr); //get next token
+    }
+
+    tokens[position] = NULL; //terminate the array with NULL
+    return tokens;
+}
+
 
 
 
