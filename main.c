@@ -1,13 +1,19 @@
 #include "main.h"
 
-#define LSH_RL_BUFSIZE 1024 //1kb of buffer size
-#define LSH_TOK_BUFSIZE 62 //token size of 64bytes
-#define LSH_TOK_DELIM " \t\r\n\a" //delimiters for tokenizing, passed into strtok to tell which separate tokens
+//list of commands
+char *builtInStr[] = {
+    "cd", "help", "exit"
+};
 
-//Function Declarations
-void lshLoop(void);
-char *lshReadLine(void);
-char **lshSplitLine(char *line);
+//their corresponding functions
+int (*builtInFunction[]) (char**) = {
+    &lshCd, &lshHelp, &lshExit
+};
+
+int lshNumBuiltIns() //returns the number of built-in commands
+{
+    return sizeof(builtInStr) / sizeof(char*);
+}
 
 
 int main(int argc, char **argv)
@@ -32,9 +38,9 @@ void lshLoop(void)
     do
     {
         printf(">> "); //prompt
-        //line = lshReadLine(); //call a function to read a line
-        //args = lshSplitLine(line); //split the line into arguments
-        //status - lshExecute(args); //execute the arguments
+        line = lshReadLine(); //call a function to read a line
+        args = lshSplitLine(line); //split the line into arguments
+        status - lshExecute(args); //execute the arguments
 
         //free memory
         free(line);
@@ -160,6 +166,59 @@ int lshLaunch(char **args)
 
 }
 
+int lshCd(char **args)
+{
+    if (args[1] == NULL) //if no argument is given to cd
+    {
+        fprintf(stderr, "lsh: expected argument to \"cd\"\n");
+    } 
+    else 
+    {
+        if (chdir(args[1]) != 0) //change directory, if it returns -1 then an error occurred
+        {
+            perror("lsh");
+        }
+    }
+    return 1;
+}
 
+int lshHelp(char **args)
+{
+    int i;
+    printf("SHELL BUILT ON STEPHEN BRENNAN'S LSH\n");
+    printf("Type program names and arguments, and hit enter.\n");
+    printf("The following are built in:\n");
 
+    for(i = 0; i < lshNumBuiltIns(); i++) //list all built-in commands
+    {
+        printf("  %s\n", builtInStr[i]); //print each command
+    }
+
+    return 1;
+}
+
+int lshExit(char **args)
+{
+    return 0;
+}
+
+int lshExecute(char **args)
+{
+    int i;
+
+    if(args[0] == NULL)
+    {
+        return 1; //return 1 if an empty command is entered
+    }
+
+    for(i = 0; i < lshNumBuiltIns(); i++)//check if the command matches any built-in commands
+    {
+        if(strcmp(args[0], builtInStr[i]) == 0)
+        {
+            return(*builtInFunction[i]) (args); //call the corresponding function if match is found
+        }
+    }
+
+    return lshLaunch(args); //if no match is found, launch it as a program
+}
 
