@@ -40,7 +40,7 @@ void lshLoop(void)
         printf(">> "); //prompt
         line = lshReadLine(); //call a function to read a line
         args = lshSplitLine(line); //split the line into arguments
-        status - lshExecute(args); //execute the arguments
+        status = lshExecute(args); //execute the arguments
 
         //free memory
         free(line);
@@ -51,45 +51,22 @@ void lshLoop(void)
 
 char *lshReadLine(void)
 {
-    //declare variables
-    int bufferSize = LSH_RL_BUFSIZE;
-    int position = 0;
-    char *buffer = malloc(sizeof(char) * bufferSize); //allocate memory for the buffer
-    int c;
+    char *line = NULL;
+    ssize_t bufsize = 0; //getline allocated a buffer
 
-    if(!buffer)
+    if (getline(&line, &bufsize, stdin) == -1) //getline dynamically allocates memory if *line is NULL
     {
-        fprintf(stderr, "lsh: Allocation Error!\n"); //buffer allocation error, program terminates
-        exit(EXIT_FAILURE);
-    }
-
-    while(1)
-    {
-        c = getchar(); //read a character and store it as an integer
-
-        if(c == EOF || c == '\n') //if we reach the end of the file(or Ctrl+D) or a new line, then we
+        if (feof(stdin)) 
         {
-            buffer[position] = '\0'; //replace with null and return
-            return buffer;
-        }
-        else
-        {
-            buffer[position] = c; //else we add character to buffer
-        }
-        position++;
-    }
-
-    if(position >= bufferSize) // if the next char exceeds the current buffer size, then reallocate with +1kb
-    {
-        bufferSize += LSH_RL_BUFSIZE;
-        buffer = realloc(buffer, bufferSize);
-        
-        if(!buffer)
-        {
-            fprintf(stderr, "lsh: Allocation Error!\n"); //exit if allocation encountered an error
+            exit(EXIT_SUCCESS);  //recieved an EOF(Ctrl+D)
+        } else  {
+            perror("readline");
             exit(EXIT_FAILURE);
         }
     }
+
+    return line;
+
 }
 
 char **lshSplitLine(char *line) //returns a pointer to an array of char* pointers(an array of strings)
@@ -113,7 +90,7 @@ char **lshSplitLine(char *line) //returns a pointer to an array of char* pointer
         if(position >= bufferSize) //if next position exceeds bufferSize, reallocate
         {
             bufferSize += LSH_TOK_BUFSIZE;
-            char **temp = realloc(tokens, bufferSize * sizeof(char*)); 
+            char **temp = realloc(tokens, bufferSize * sizeof(*tokens)); 
 
             if(!temp) //if realloc fails, tokens will still point to the old block
             {
