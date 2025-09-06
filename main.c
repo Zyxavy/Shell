@@ -127,7 +127,38 @@ char **lshSplitLine(char *line) //returns a pointer to an array of char* pointer
     return tokens;
 }
 
+int lshLaunch(char **args)
+{
+    pid_t pid, wpid; //pid stores result of fork(), wpid used when waiting for the child process
+    int status;
 
+    pid = fork(); //create a new process
+
+    if(pid == 0) //child process will return 0
+    { 
+        //child replace itself with the requested program  
+        if(execvp(args[0], args) == -1) //if execvp returns -1, an error occurred, execvp searches the system PATH
+        {
+            perror("lsh");
+        }
+        exit(EXIT_FAILURE);
+    }
+    else if(pid < 0)
+    {
+        perror("lsh"); //error forking
+    }
+    else
+    { //parent process
+        do
+        {
+            wpid = waitpid(pid, &status, WUNTRACED); //wait for child process with pid and stores child's exit into into status
+
+        } while(!WIFEXITED(status) && !WIFSIGNALED(status));//keep waiting if the child process has not exited or been killed
+    }
+
+    return 1;
+
+}
 
 
 
