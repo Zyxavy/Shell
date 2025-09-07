@@ -1,20 +1,5 @@
 #include "main.h"
-
-//list of commands
-char *builtInStr[] = {
-    "cd", "help", "exit"
-};
-
-//their corresponding functions
-int (*builtInFunction[]) (char**) = {
-    &lshCd, &lshHelp, &lshExit
-};
-
-int lshNumBuiltIns() //returns the number of built-in commands
-{
-    return sizeof(builtInStr) / sizeof(char*);
-}
-
+#include "commands.c"
 
 int main(int argc, char **argv)
 {
@@ -141,42 +126,6 @@ int lshLaunch(char **args)
 
     return 1;
 
-}
-
-int lshCd(char **args)
-{
-    if (args[1] == NULL) //if no argument is given to cd
-    {
-        fprintf(stderr, "lsh: expected argument to \"cd\"\n");
-    } 
-    else 
-    {
-        if (chdir(args[1]) != 0) //change directory, if it returns -1 then an error occurred
-        {
-            perror("lsh");
-        }
-    }
-    return 1;
-}
-
-int lshHelp(char **args)
-{
-    int i;
-    printf("SHELL BUILT ON STEPHEN BRENNAN'S LSH\n");
-    printf("Type program names and arguments, and hit enter.\n");
-    printf("The following are built in:\n");
-
-    for(i = 0; i < lshNumBuiltIns(); i++) //list all built-in commands
-    {
-        printf("  %s\n", builtInStr[i]); //print each command
-    }
-
-    return 1;
-}
-
-int lshExit(char **args)
-{
-    return 0;
 }
 
 int lshExecute(char **args)

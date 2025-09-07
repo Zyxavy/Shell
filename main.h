@@ -18,9 +18,13 @@ void lshLoop(void);
 char *lshReadLine(void);
 char **lshSplitLine(char *line);
 int lshExecute(char **args);
+
+//commands
 int lshCd(char **args);
 int lshHelp(char **args);
 int lshExit(char **args);
+int lshPwd(char **args);
+int lshEcho(char **args);
 
 
 
