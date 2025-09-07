@@ -11,6 +11,9 @@ Note: This lsh only works on Linux/Unix Systems or WSL, it will not work nativel
 <li>cd - change directory</li>
 <li>help - list all commands</li>
 <li>exit - exit out of shell</li>
+<li>pwd - print current working directory</li>
+<li>echo - echo or print your arguments</li>
+<li>clear - clear the terminal</li>
 </ul>
 
 <hr>

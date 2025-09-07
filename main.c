@@ -54,23 +54,71 @@ char *lshReadLine(void)
 
 }
 
-char **lshSplitLine(char *line) //returns a pointer to an array of char* pointers(an array of strings)
-{
-    int bufferSize = LSH_TOK_BUFSIZE, position = 0; 
-    char **tokens = malloc(bufferSize * sizeof(*tokens));//allocate memory for tokens array
-    char *token, *saveptr; //temporary variable to hold each token
+char **lshSplitLine(char *line) 
+{ 
+    int bufferSize = LSH_TOK_BUFSIZE, position = 0; //initial capacity for tokens array and current index
+    char **tokens = malloc(bufferSize * sizeof(*tokens)); //each entry will point to a token string
 
-    if(!tokens)
+    if(!tokens) //if malloc fails, print the error
     {
         fprintf(stderr, "lsh: Allocation Error!\n");
         exit(EXIT_FAILURE);
     }
 
-    token = strtok_r(line, LSH_TOK_DELIM, &saveptr); //scans the line and returns the first sequence of char that does not contain the delimeters
-    while(token != NULL) //while there are tokens
+    char *current = malloc(strlen(line) + 1); //temporary buffer to hold one token at a time
+    int curPos = 0; //current position
+    bool inQuote = false;
+    char quoteChar = '\0'; //remembers which type of qoute (' or ")
+
+    for(int i = 0; line[i] != '\0'; i++) //iterate through every character in line
     {
-        tokens[position] = token; //store token to the array
-        position++;
+        char c = line[i];
+
+        if(inQuote)
+        {
+            if(c == quoteChar) //if in a qoute and 'c' matches (' or ")
+            {
+                current[curPos] = '\0'; //null terminate the token
+                tokens[position++] = strdup(current); // makes a copy with strdup
+                curPos = 0;
+                inQuote = false;
+            }
+            else // we keep adding character to current
+            {
+                current[curPos++] = c;
+            }
+        }
+        else // if not inside a qoute
+        {
+            if(c == '"' || c == '\'')  //if 'c' is ['] or ["], it is qouted
+            {
+                inQuote = true;
+                quoteChar = c;
+            }
+            else if (c == ' ' || c == '\t' || c == '\n') // partial token will be finished and stored
+            {
+                if(curPos > 0)
+                {
+                    current[curPos] = '\0';
+                    tokens[position++] = strdup(current);
+                    curPos = 0;
+                }
+            }
+            else if (c == '|' || c == '<' || c == '>') // store operator as its own token
+            {
+                if(curPos > 0)
+                {
+                    current[curPos] = '\0';
+                    tokens[position++] = strdup(current);
+                    curPos = 0;
+                }
+                tokens[position++] = strndup(&line[i], 1); //duplicate just one character into a new string
+            }
+            else
+            {
+                current[curPos++] = c; //append to current if normal character
+            }
+        }
 
         if(position >= bufferSize) //if next position exceeds bufferSize, reallocate
         {
@@ -88,11 +136,18 @@ char **lshSplitLine(char *line) //returns a pointer to an array of char* pointer
         
         }
 
-        token = strtok_r(NULL, LSH_TOK_DELIM, &saveptr); //get next token
     }
 
-    tokens[position] = NULL; //terminate the array with NULL
-    return tokens;
+    if(curPos > 0) // finish building the token
+    {
+        current[curPos] = '\0';
+        tokens[position++] = strdup(current);
+    }
+
+    tokens[position] = NULL; //add the final NULL to the array
+    free(current);
+
+    return tokens; //return the array of tokens
 }
 
 int lshLaunch(char **args)
