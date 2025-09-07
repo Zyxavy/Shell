@@ -74,7 +74,7 @@ char **lshSplitLine(char *line) //returns a pointer to an array of char* pointer
 
         if(position >= bufferSize) //if next position exceeds bufferSize, reallocate
         {
-            bufferSize += LSH_TOK_BUFSIZE;
+            bufferSize *= 2;
             char **temp = realloc(tokens, bufferSize * sizeof(*tokens)); 
 
             if(!temp) //if realloc fails, tokens will still point to the old block

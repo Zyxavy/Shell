@@ -16,7 +16,7 @@ Note: This lsh only works on Linux/Unix Systems or WSL, it will not work nativel
 <hr>
 <h4> To be implemented </h4>
 <ul> 
-<li>pwd, echo, clear</li>
+<li><s>pwd, echo, clear</s></li>
 <li>Better error handling</li>
 <li>Background execution (&)</li>
 <li>Redirection (<, >, >>)</li>

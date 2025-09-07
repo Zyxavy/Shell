@@ -1,14 +1,14 @@
 #include "main.h"
-#include "limits.h" // for PATH_MAX
 
 //list of commands
 char *builtInStr[] = {
-    "cd", "help", "exit", "pwd"
+    "cd", "help", "exit", "pwd", "echo", "clear"
 };
 
 //their corresponding functions
 int (*builtInFunction[]) (char**) = {
-    &lshCd, &lshHelp, &lshExit, &lshPwd
+    &lshCd, &lshHelp, &lshExit, &lshPwd, &lshEcho,
+    &lshClear
 };
 
 int lshNumBuiltIns() //returns the number of built-in commands
@@ -66,4 +66,29 @@ int lshPwd(char **args)
     }
 
     return 1; // keep shell running
+}
+
+int lshEcho(char **args)
+{
+    int i = 1; //start at 1 so we ignore "echo"
+
+    while(args[i] != NULL) //if it is not Null we print the arguments and stop at null
+    {
+        printf("%s", args[i]);
+
+        if(args[i + 1] != NULL)
+        {
+            printf(" ");
+        }
+        i++;
+    }
+    printf("\n");
+    
+    return 1; // keep the shell running
+}
+
+int lshClear(char **args)
+{
+    printf("\033[H\033[J");//clears the terminal "\033 escape char" "[H moves the cursor the the 'home' position" "[J clears the screen"
+    return 1;
 }

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <unistd.h> //for fork() and etc.
 #include <sys/wait.h> // for waitpid()
+#include "limits.h" // for PATH_MAX
 
 
 #define LSH_RL_BUFSIZE 1024 //1kb of buffer size
@@ -25,7 +26,7 @@ int lshHelp(char **args);
 int lshExit(char **args);
 int lshPwd(char **args);
 int lshEcho(char **args);
-
+int lshClear(char **args);
 
 
 #endif // MAIN_H
