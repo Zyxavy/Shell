@@ -16,6 +16,22 @@ int lshNumBuiltIns() //returns the number of built-in commands
     return sizeof(builtInStr) / sizeof(char*);
 }
 
+void lshBanner() 
+{
+    printf(
+    " __        ______  ________  ________  __        ________               ______   __    __  ________  __        __       \n"
+    "/  |      /      |/        |/        |/  |      /        |             /      \\ /  |  /  |/        |/  |      /  |      \n"
+    "$$ |      $$$$$$/ $$$$$$$$/ $$$$$$$$/ $$ |      $$$$$$$$/             /$$$$$$  |$$ |  $$ |$$$$$$$$/ $$ |      $$ |      \n"
+    "$$ |        $$ |     $$ |      $$ |   $$ |      $$ |__                $$ \\__$$/ $$ |__$$ |$$ |__    $$ |      $$ |      \n"
+    "$$ |        $$ |     $$ |      $$ |   $$ |      $$    |               $$      \\ $$    $$ |$$    |   $$ |      $$ |      \n"
+    "$$ |        $$ |     $$ |      $$ |   $$ |      $$$$$/                 $$$$$$  |$$$$$$$$ |$$$$$/    $$ |      $$ |      \n"
+    "$$ |_____  _$$ |_    $$ |      $$ |   $$ |_____ $$ |_____             /  \\__$$ |$$ |  $$ |$$ |_____ $$ |_____ $$ |_____ \n"
+    "$$       |/ $$   |   $$ |      $$ |   $$       |$$       |            $$    $$/ $$ |  $$ |$$       |$$       |$$       |\n"
+    "$$$$$$$$/ $$$$$$/    $$/       $$/    $$$$$$$$/ $$$$$$$$/              $$$$$$/  $$/   $$/ $$$$$$$$/ $$$$$$$$/ $$$$$$$$/ \n"
+    "\n"
+        );
+}
+
 int lshCd(char **args)
 {
     if (args[1] == NULL) //if no argument is given to cd
@@ -35,7 +51,7 @@ int lshCd(char **args)
 int lshHelp(char **args)
 {
     int i;
-    printf("SHELL BUILT ON STEPHEN BRENNAN'S LSH\n");
+    lshBanner();
     printf("Type program names and arguments, and hit enter.\n");
     printf("The following are built in:\n");
 

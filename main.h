@@ -20,6 +20,7 @@ void lshLoop(void);
 char *lshReadLine(void);
 char **lshSplitLine(char *line);
 int lshExecute(char **args);
+void lshBanner(); 
 
 //commands
 int lshCd(char **args);

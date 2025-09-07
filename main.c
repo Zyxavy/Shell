@@ -3,9 +3,8 @@
 
 int main(int argc, char **argv)
 {
-    //Load Config Files
-
-
+    //print banner
+    lshBanner();
     //Run command loop
     lshLoop();
 
