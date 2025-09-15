@@ -1,20 +1,24 @@
 # Shell
-🐚 Shell in C
+<h3>🐚 Shell in C</h3>
+<br>
 A simple Unix shell built in C, inspired by Stephen Brennan's tutorial.
 
-🛠️ About
+<h3>🛠️ About:</h3>
+<br>
 This project is a minimalist shell implementation that handles basic command execution. It was developed on Windows 10 using WSL (Windows Subsystem for Linux) to compile and run in a Linux environment.
 
     ⚠️ Note: This shell (lsh) is designed for Linux/Unix systems or WSL. It will not run natively on Windows, as it relies on POSIX system calls that are not supported in the Windows environment.
 
-🚀 Getting Started
+<h3>🚀 Getting Started</h3>
+<br>
 To compile and run:
-
-gcc -o lsh lsh.c
-./lsh
+<br>
+1. gcc lsh.c -o lsh
+<br>
+2. ./lsh
 
 Make sure you're using a POSIX-compliant environment like Linux or WSL.
-</h2>
+
 <br>
 
 <h4>📦 current commands:</h4>
@@ -48,4 +52,5 @@ Make sure you're using a POSIX-compliant environment like Linux or WSL.
 STATUS = UNFINISHED
 
 📚 Reference
+<br>
 Original tutorial: "https://brennan.io/2015/01/16/write-a-shell-in-c/"
