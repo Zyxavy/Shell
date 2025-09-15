@@ -207,31 +207,31 @@ int lshExecute(char **args)
 //misc built-ins
 void printCustomPrompt()
 {
-    char cwd[PATH_MAX];
-    char host[HOST_NAME_MAX];
-    char *home = getenv("HOME");
-    char *user = getenv("USER");
+    char cwd[PATH_MAX]; //buffer for current working directory
+    char host[HOST_NAME_MAX]; //buffer for hostname
+    char *home = getenv("HOME"); //store hostname
+    char *user = getenv("USER");//store user
 
-    if(getcwd(cwd, sizeof(cwd)) == NULL)
+    if(getcwd(cwd, sizeof(cwd)) == NULL) //print error if getcwd fails
     {
         perror("getcwd");
         return;
     }
 
-    if(gethostname(host, sizeof(host)) != 0)
+    if(gethostname(host, sizeof(host)) != 0) //print error if gethostname fails
     {
         perror("gethostname");
         return;
     }
 
-    const char *shortPath = cwd;
-    if (home && strncmp(cwd, home, strlen(home)) == 0) 
+    const char *shortPath = cwd; 
+    if (home && strncmp(cwd, home, strlen(home)) == 0) //if cwd starts with "home"
     {
-        shortPath = cwd + strlen(home);
-        printf("%s@%s:~%s$ ", user, host, shortPath);
+        shortPath = cwd + strlen(home); //skip over "home" part
+        printf(COLOR_RED "%s" COLOR_GREEN "@%s" COLOR_YELLOW ":" COLOR_BLUE "%s" COLOR_RESET ">> ", user, host, shortPath); //print prompt with '~' for home directory
     } else 
     {
-        printf("%s@%s:%s$ ", user, host, cwd);
+        printf(COLOR_RED "%s" COLOR_GREEN "@%s" COLOR_YELLOW ":" COLOR_BLUE "%s" COLOR_RESET ">> " , user, host, cwd); //print full path if not in home directory
     }
 
 

@@ -13,6 +13,11 @@
 #define LSH_RL_BUFSIZE 1024 //1kb of buffer size
 #define LSH_TOK_BUFSIZE 62 //token size of 64bytes
 #define LSH_TOK_DELIM " \t\r\n\a" //delimiters for tokenizing, passed into strtok to tell which separate tokens
+#define COLOR_RESET "\033[0m" //ANSI escape code to reset color
+#define COLOR_GREEN "\033[1;32m" //ANSI escape code for green text
+#define COLOR_BLUE "\033[1;34m" //ANSI escape code for blue text
+#define COLOR_RED "\033[1;31m" //ANSI escape code for red text
+#define COLOR_YELLOW "\033[1;33m" //ANSI escape code for yellow text
 
 
 //Function Declarations
