@@ -12,6 +12,7 @@ int main(int argc, char **argv)
     return EXIT_SUCCESS;
 }
 
+//functions
 void lshLoop(void)
 {
     //declare variables
@@ -21,7 +22,8 @@ void lshLoop(void)
 
     do
     {
-        printf(">> "); //prompt
+        printCustomPrompt(); //prompt
+
         line = lshReadLine(); //call a function to read a line
         args = lshSplitLine(line); //split the line into arguments
         status = lshExecute(args); //execute the arguments
@@ -202,3 +204,35 @@ int lshExecute(char **args)
     return lshLaunch(args); //if no match is found, launch it as a program
 }
 
+//misc built-ins
+void printCustomPrompt()
+{
+    char cwd[PATH_MAX];
+    char host[HOST_NAME_MAX];
+    char *home = getenv("HOME");
+    char *user = getenv("USER");
+
+    if(getcwd(cwd, sizeof(cwd)) == NULL)
+    {
+        perror("getcwd");
+        return;
+    }
+
+    if(gethostname(host, sizeof(host)) != 0)
+    {
+        perror("gethostname");
+        return;
+    }
+
+    const char *shortPath = cwd;
+    if (home && strncmp(cwd, home, strlen(home)) == 0) 
+    {
+        shortPath = cwd + strlen(home);
+        printf("%s@%s:~%s$ ", user, host, shortPath);
+    } else 
+    {
+        printf("%s@%s:%s$ ", user, host, cwd);
+    }
+
+
+}

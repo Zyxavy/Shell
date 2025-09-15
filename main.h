@@ -22,6 +22,9 @@ char **lshSplitLine(char *line);
 int lshExecute(char **args);
 void lshBanner(); 
 
+//misc built-ins
+void printCustomPrompt();
+
 //commands
 int lshCd(char **args);
 int lshHelp(char **args);
