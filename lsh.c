@@ -1,14 +1,17 @@
-#include "main.h"
 #include "commands.c"
+#include "lsh.h"
 
 int main(int argc, char **argv)
 {
-    //print banner
+    //Print banner
     lshBanner();
+    //Initialize history
+    historyInit(&hist);
     //Run command loop
     lshLoop();
 
     //Shutdown and Cleanup
+    historyFree(&hist);
     return EXIT_SUCCESS;
 }
 
@@ -25,6 +28,7 @@ void lshLoop(void)
         printCustomPrompt(); //prompt
 
         line = lshReadLine(); //call a function to read a line
+        historyAdd(&hist, line); //add the line to history
         args = lshSplitLine(line); //split the line into arguments
         status = lshExecute(args); //execute the arguments
 
@@ -234,5 +238,71 @@ void printCustomPrompt()
         printf(COLOR_RED "%s" COLOR_GREEN "@%s" COLOR_YELLOW ":" COLOR_BLUE "%s" COLOR_RESET ">> " , user, host, cwd); //print full path if not in home directory
     }
 
+}
 
+void historyInit(History *h)
+{
+    h->entries = calloc(HISTORY_CAPACITY, sizeof(char*)); //allocate memory for history entries
+    h->capacity = HISTORY_CAPACITY;
+    h->size = 0;
+    h->start = 0;
+    h->total = 0;
+}
+
+int isAllWhiteSpace(const char *s)
+{
+    while(*s)
+    {
+        if(!isspace((unsigned char) *s)) return 0; //return if a non-whitespace character is found
+        s++;
+    }
+    return 1;
+}
+
+void historyAdd(History *h, const char *line)
+{
+    if(!line || isAllWhiteSpace(line)) //ignore empty or whitespace-only commands
+    {
+        return;
+    }
+
+    char* temp = strdup(line); //duplicate the command string
+    if (!temp) 
+    {
+        fprintf(stderr, "lsh: history allocation error\n");
+        return;
+    }
+
+    if(h->size < h->capacity) //there is still space in history
+    {
+        h->entries[(h->start + h->size) % h->capacity] = temp; //add new entry at the end
+        h->size++; //increase size
+    }
+    else
+    {
+        free(h->entries[h->start]); //free the oldest entry
+        h->entries[h->start] = temp; //replace it with the new entry
+        h->start = (h->start + 1) % h->capacity;//move start to the next oldest entry
+    }
+    h->total++; //increment total commands added
+}
+
+void historyPrint(const History *h)
+{
+    unsigned long firstNum = h->total - h->size + 1; //the number of the first command in history
+
+    for(size_t i = 0; i < h->size; i++) //print each entry in order
+    {
+        size_t index = (h->start + i) % h->capacity; //calculate the correct index in the circular buffer
+        printf(COLOR_GREEN"%lu" COLOR_YELLOW":" COLOR_RESET"%s\n", firstNum + i, h->entries[index]); //print command number and entry
+    }
+}
+
+void historyFree(History *h)
+{
+    for(size_t i = 0; i < h->size; i++) 
+    {
+        free(h->entries[(h->start + i) % h->capacity]); //free each entry
+    }
+    free(h->entries); //free the entries array
 }

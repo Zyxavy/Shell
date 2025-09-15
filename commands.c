@@ -1,14 +1,16 @@
-#include "main.h"
+#include "lsh.h"
+
+
 
 //list of commands
 char *builtInStr[] = {
-    "cd", "help", "exit", "pwd", "echo", "clear"
+    "cd", "help", "exit", "pwd", "echo", "clear", "history"
 };
 
 //their corresponding functions
 int (*builtInFunction[]) (char**) = {
     &lshCd, &lshHelp, &lshExit, &lshPwd, &lshEcho,
-    &lshClear
+    &lshClear, &lshHistory
 };
 
 int lshNumBuiltIns() //returns the number of built-in commands
@@ -106,5 +108,12 @@ int lshEcho(char **args)
 int lshClear(char **args)
 {
     printf("\033[H\033[J");//clears the terminal "\033 escape char" "[H moves the cursor the the 'home' position" "[J clears the screen"
+    return 1;
+}
+
+int lshHistory(char **args)
+{
+    (void)*args; //suppresses unused parameter warning
+    historyPrint(&hist); //print the command history
     return 1;
 }
