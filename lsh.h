@@ -39,6 +39,7 @@ void lshLoop(void);
 char *lshReadLine(void);
 char **lshSplitLine(char *line);
 int lshExecute(char **args);
+
 //misc built-ins
 void printCustomPrompt();
 void historyInit(History *h);
