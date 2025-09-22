@@ -30,6 +30,8 @@ Make sure you're using a POSIX-compliant environment like Linux or WSL.
 <li>echo - echo or print your arguments</li>
 <li>clear - clear the terminal</li>
 <li>history - prints the command history</li>
+<li>mkdir - make a directory</li>
+<li>rmdir - remove a directory</li>
 </ul>
 
 <hr>

@@ -4,13 +4,13 @@
 
 //list of commands
 char *builtInStr[] = {
-    "cd", "help", "exit", "pwd", "echo", "clear", "history"
+    "cd", "help", "exit", "pwd", "echo", "clear", "history", "mkdir"
 };
 
 //their corresponding functions
 int (*builtInFunction[]) (char**) = {
     &lshCd, &lshHelp, &lshExit, &lshPwd, &lshEcho,
-    &lshClear, &lshHistory
+    &lshClear, &lshHistory, &lshMkdir
 };
 
 int lshNumBuiltIns() //returns the number of built-in commands
@@ -115,5 +115,23 @@ int lshHistory(char **args)
 {
     (void)*args; //suppresses unused parameter warning
     historyPrint(&hist); //print the command history
+    return 1;
+}
+
+int lshMkdir(char **args)
+{
+    if(args[1] == NULL) // if there is no argument for mkdir print an error
+    {
+        printf("mkdir: missing operand");
+    }
+    else
+    {
+        int result = mkdir(args[1], 0755); //mkdir is already provided by the OS, this function is basically just a wrapper
+        if(result == -1)
+        {
+            perror("mkdir");
+        }
+    }
+
     return 1;
 }

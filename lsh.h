@@ -8,6 +8,7 @@
 #include <ctype.h>
 #include <unistd.h> //for fork() and etc.
 #include <sys/wait.h> // for waitpid()
+#include <sys/stat.h> //for mkdir()
 #include "limits.h" // for PATH_MAX
 #include <bits/local_lim.h> //for HOST_NAME_MAX
 
@@ -39,6 +40,7 @@ void lshLoop(void);
 char *lshReadLine(void);
 char **lshSplitLine(char *line);
 int lshExecute(char **args);
+int lshLaunch(char **args, bool background);
 
 //misc built-ins
 void printCustomPrompt();
@@ -56,6 +58,7 @@ int lshPwd(char **args);
 int lshEcho(char **args);
 int lshClear(char **args);
 int lshHistory(char **args);
+int lshMkdir(char **args);
 void lshBanner(); 
 
 

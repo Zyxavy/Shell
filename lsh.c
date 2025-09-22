@@ -155,7 +155,7 @@ char **lshSplitLine(char *line)
     return tokens; //return the array of tokens
 }
 
-int lshLaunch(char **args)
+int lshLaunch(char **args, bool background)
 {
     pid_t pid, wpid; //pid stores result of fork(), wpid used when waiting for the child process
     int status;
@@ -172,16 +172,23 @@ int lshLaunch(char **args)
         exit(EXIT_FAILURE);
     }
     else if(pid < 0)
-    {
+    { 
         perror("lsh"); //error forking
     }
     else
     { //parent process
-        do
+        if(background)
         {
-            wpid = waitpid(pid, &status, WUNTRACED); //wait for child process with pid and stores child's exit into into status
+            printf("[pid%d] running in the backgound", pid);
+        }
+        else
+        {
+            do
+            {
+                wpid = waitpid(pid, &status, WUNTRACED); //wait for child process with pid and stores child's exit into into status
 
-        } while(!WIFEXITED(status) && !WIFSIGNALED(status));//keep waiting if the child process has not exited or been killed
+            } while(!WIFEXITED(status) && !WIFSIGNALED(status));//keep waiting if the child process has not exited or been killed
+        }
     }
 
     return 1;
@@ -191,6 +198,7 @@ int lshLaunch(char **args)
 int lshExecute(char **args)
 {
     int i;
+    bool background = false;
 
     if(args[0] == NULL)
     {
@@ -205,7 +213,16 @@ int lshExecute(char **args)
         }
     }
 
-    return lshLaunch(args); //if no match is found, launch it as a program
+    int last = 0;
+    while (args[last] != NULL) last++; //find the last argument
+    if(last > 0 && strcmp(args[last-1], "&") == 0) //if the argument has '&' it is treated as a background process
+    {
+        background = true;
+        args[last-1] = NULL;
+    }
+    
+
+    return lshLaunch(args, background); //if no match is found, launch it as a program
 }
 
 //misc built-ins
