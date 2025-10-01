@@ -164,11 +164,77 @@ int lshLaunch(char **args, bool background)
 
     if(pid == 0) //child process will return 0
     { 
+        //code block for redirections
+        for(int i = 0; args[i] != NULL; i++)
+        {
+            if(strcmp(args[i], ">") == 0)
+            {
+                if(args[i+1] == NULL) //if there is no file after '>'
+                {
+                    fprintf(stderr, "syntax error near unexpected token '>'\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                //open the file for writing, create it if it doesn't exist, truncate it if it does
+                char* fileName = args[i + 1];
+                int fd = open(fileName, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+
+                if(fd < 0) //error opening the file
+                {
+                    perror("open");
+                    exit(EXIT_FAILURE);
+                }
+
+                dup2(fd, STDOUT_FILENO);
+                close(fd);
+
+                //remove the redirection operators and filename from args
+                int j;
+                for(j = i; args[j+2] != NULL; j++) args[j] = args[j+2];
+                args[j] = NULL;
+                args[j+1] = NULL;
+                i--;
+            }
+            else if (strcmp(args[i], "<") == 0)
+            {
+                if(args[i+1] == NULL)//same thing earlier
+                {
+                    fprintf(stderr, "syntax error near unexpected token '<'\n");
+                    exit(EXIT_FAILURE);
+                }
+
+                //same proccess but you read only
+                char* fileName = args[i + 1];
+                int fd = open(fileName, O_RDONLY);
+
+                if(fd < 0)//error
+                {
+                    perror("open");
+                    exit(EXIT_FAILURE);
+                }
+
+                dup2(fd, STDIN_FILENO);
+                close(fd);
+
+                //remove the redirection and filename
+                int j;
+                for(j = i; args[j+2] != NULL; j++) args[j] = args[j+2];
+                args[j] = NULL;
+                args[j+1] = NULL;
+                i--;
+            }
+        }
+
+        for (int k = 0; args[k] != NULL; k++) {
+            printf("arg[%d] = %s\n", k, args[k]);
+        }
+
         //child replace itself with the requested program  
         if(execvp(args[0], args) == -1) //if execvp returns -1, an error occurred, execvp searches the system PATH
         {
             perror("lsh");
         }
+
         exit(EXIT_FAILURE);
     }
     else if(pid < 0)

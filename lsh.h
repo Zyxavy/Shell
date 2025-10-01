@@ -7,10 +7,12 @@
 #include <stdbool.h>
 #include <ctype.h>
 #include <unistd.h> //for fork() and etc.
-#include <sys/wait.h> // for waitpid()
+#include <sys/wait.h> //for waitpid()
 #include <sys/stat.h> //for mkdir()
 #include "limits.h" // for PATH_MAX
 #include <bits/local_lim.h> //for HOST_NAME_MAX
+#include <fcntl.h> //for file control options
+#include <sys/types.h>//for data types
 
 //Macros
 #define LSH_RL_BUFSIZE 1024 //1kb of buffer size
