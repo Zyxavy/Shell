@@ -37,18 +37,9 @@ Make sure you're using a POSIX-compliant environment like Linux or WSL.
 <hr>
 <h4> To be implemented </h4>
 <ul> 
-<li><s>pwd, echo, clear</s></li>
-<li>Better error handling</li>
-<li>Background execution (&)</li>
 <li>Redirection (<, >, >>)</li>
 <li>Piping (|)</li>
-<li>History + history builtin?</li>
 <li>Aliases ?(alias ll="ls -l")</li>
-<li>Environment variables ($PATH, export)?</li>
-<li>Globbing (*.c)?</li>
-<li>Job control (fg, bg, jobs)?</li>
-<li>Tab completion?</li>
-<li>Scripting support?</li>
 </ul>
 <br>
 STATUS = UNFINISHED
