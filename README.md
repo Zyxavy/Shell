@@ -37,7 +37,6 @@ Make sure you're using a POSIX-compliant environment like Linux or WSL.
 <hr>
 <h4> To be implemented </h4>
 <ul> 
-<li>Redirection (<, >, >>)</li>
 <li>Piping (|)</li>
 <li>Aliases ?(alias ll="ls -l")</li>
 </ul>

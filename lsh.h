@@ -62,9 +62,8 @@ int lshClear(char **args);
 int lshHistory(char **args);
 int lshMkdir(char **args);
 void lshBanner(); 
+int lshExecutePiped(char ***cmds, int n);
 
-
-void remove_redirection_tokens(char **args, int i);
 
 
 #endif // LSH_H

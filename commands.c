@@ -135,3 +135,63 @@ int lshMkdir(char **args)
 
     return 1;
 }
+
+int lshExecutePiped(char ***cmds, int n)
+{
+    int i;
+    int pipefd[2 * (n-1)]; //file descriptors for the pipes
+
+    for(i = 0; i < n-1; i++)
+    {
+        if(pipe(pipefd + i*2) < 0) //create a pipe and if it fails print an error
+        {
+            perror("pipe");
+            return 1;
+        }
+    }
+
+    int pid;
+    for(i = 0; i < n; i++)
+    {
+        pid = fork();//create a new process
+
+        if(pid == 0) //child process
+        {
+            if(i > 0)
+            {
+                dup2(pipefd[(i-1) * 2], STDIN_FILENO); //redirect stdin to read end of previous pipe
+            }
+
+            if(i < n - 1)
+            {
+                dup2(pipefd[i * 2 + 1], STDOUT_FILENO); //redirect stdout to write end of current pipe
+            }
+
+            for(int j = 0; j < 2 * (n-1); j++)
+            {
+                close(pipefd[j]); //close all pipe fds in child
+            }
+
+            execvp(cmds[i][0], cmds[i]); //execute the command
+            perror("execvp"); 
+            exit(EXIT_FAILURE);
+        }
+        else if (pid < 0) //error forking
+        {
+            perror("fork");
+            return 1;
+        }
+    }
+
+    for(i = 0; i < 2 * (n-1); i++)
+    {
+        close(pipefd[i]);//close all pipe fds in parent
+    }
+
+    for(i = 0; i < n; i++)
+    {
+        wait(NULL);//wait for all child processes to finish
+    }
+
+    return 1;
+}

@@ -157,20 +157,22 @@ char **lshSplitLine(char *line)
 
 int lshLaunch(char **args, bool background)
 {
+    //Fork and launch the process
     pid_t pid, wpid;
     int status;
 
-    pid = fork();
-    if (pid == 0) 
+    pid = fork(); //create a new process
+
+    if (pid == 0)
     {
         // Child process
-        if (execvp(args[0], args) == -1) 
+        if (execvp(args[0], args) == -1)  
         {
             perror("lsh");
         }
         exit(EXIT_FAILURE); // execvp only returns on error
     } 
-    else if (pid < 0) 
+    else if (pid < 0) //if it returns -1 it means there was an error
     {
         // Error forking
         perror("lsh");
@@ -178,20 +180,20 @@ int lshLaunch(char **args, bool background)
     else 
     {
         // Parent process
-        if (background) 
+        if (background)
         {
             printf("[pid %d] running in the background\n", pid);
         } 
         else 
         {
-            do 
+            do
             {
-                wpid = waitpid(pid, &status, WUNTRACED);
-            } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+                wpid = waitpid(pid, &status, WUNTRACED); //wait for child process to change state
+            } while (!WIFEXITED(status) && !WIFSIGNALED(status)); //keep waiting if the child hasn't exited or been killed
         }
     }
 
-    return 1;
+    return 1; //return 1 to continue the shell loop
 }
 
 int lshExecute(char **args)
@@ -201,34 +203,85 @@ int lshExecute(char **args)
         return 1; // An empty command was entered.
     }
 
-    //File descriptors for redirection
-    int saved_stdin = -1;
-    int saved_stdout = -1;
+    int numPipes = 0; //count number of pipes in args
+    for(int i = 0; args[i]; i++)
+    {
+        if(strcmp(args[i], "|") == 0) numPipes++; //increment for each pipe found
+    }
+
+    if(numPipes > 0)
+    {
+        int numCmds = numPipes + 1; //number of commands is one more than number of pipes
+        char ***cmds = malloc(numCmds * sizeof(char***));//array of command arrays
+        int start = 0, cmdIndex = 0;
+
+        for(int i = 0; ; i++)//iterate through the args
+        {
+            if(args[i] == NULL || strcmp(args[i], "|") == 0) //if end of args or pipe is found
+            {
+                int len = i - start;
+                cmds[cmdIndex] = malloc((len + 1) * sizeof(char*)); //allocate space for this command
+
+                for(int j = 0; j < len; j++)
+                {
+                    cmds[cmdIndex][j] = args[start + j]; //copy the argument into the command array
+                }
+
+                cmds[cmdIndex][len] = NULL; //null terminate the command array
+
+                cmdIndex++;
+                start = i + 1;
+
+                if(args[i] == NULL) break;
+            }
+        }
+
+        int status = lshExecutePiped(cmds, numCmds); //execute the piped commands
+
+        for(int i = 0; i < numCmds; i++) //free each command array
+        {
+            free(cmds[i]);
+        }
+        free(cmds);
+
+        return status;
+    }
+
+
+
+
+    //File descriptors for redirection all are in invalid states and will be changed once they are used
+    int saved_stdin = -1; 
+    int saved_stdout = -1; 
     int in_fd = -1;
-    int out_fd = -1;
+    int out_fd = -1; 
     char *inputFile = NULL;
     char *outputFile = NULL;
 
     //Scan for redirections and setup file descriptors
     for (int i = 0; args[i] != NULL; i++) 
     {
-        if (strcmp(args[i], "<") == 0) 
+        
+        if (strcmp(args[i], "<") == 0) //input redirection
         {
-            if (args[i+1] == NULL) 
+            if (args[i+1] == NULL) //no file specified after '<'
             {
                 fprintf(stderr, "lsh: syntax error near unexpected token `<'\n");
                 return 1;
             }
+
             inputFile = args[i+1];
             args[i] = NULL; //Remove redirection operator and filename from args
             args[i+1] = NULL;
             i++; //Skip the filename in the next iteration
-        } else if (strcmp(args[i], ">") == 0) 
+        } 
+        else if (strcmp(args[i], ">") == 0) //output redirection
         {
             if (args[i+1] == NULL) {
                 fprintf(stderr, "lsh: syntax error near unexpected token `>'\n");
                 return 1;
             }
+
             outputFile = args[i+1];
             args[i] = NULL; //Remove redirection operator and filename from args
             args[i+1] = NULL;
@@ -239,52 +292,58 @@ int lshExecute(char **args)
     //Apply the redirections 
     if (inputFile) 
     {
-        in_fd = open(inputFile, O_RDONLY);
-        if (in_fd < 0) 
+        in_fd = open(inputFile, O_RDONLY); //Open file for reading
+
+        if (in_fd < 0) //if an error occurs when opening file
         {
             perror("lsh: open");
             return 1;
         }
+
         saved_stdin = dup(STDIN_FILENO); //Save original stdin
-        dup2(in_fd, STDIN_FILENO);      //Redirect stdin
+        dup2(in_fd, STDIN_FILENO); //Redirect stdin
     }
     if (outputFile) 
     {
-        out_fd = open(outputFile, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-        if (out_fd < 0) 
+        out_fd = open(outputFile, O_WRONLY | O_CREAT | O_TRUNC, 0644); //Open file for writing, create if it doesn't exist, truncate if it does
+        if (out_fd < 0) //if an error occurs when opening file
         {
             perror("lsh: open");
             return 1;
         }
+
         saved_stdout = dup(STDOUT_FILENO); //Save original stdout
-        dup2(out_fd, STDOUT_FILENO);       //Redirect stdout
+        dup2(out_fd, STDOUT_FILENO); //Redirect stdout
     }
 
-    //Execute the command
+    //Execute the command or builtins
     int status = 1;
     bool is_builtin = false;
     for (int i = 0; i < lshNumBuiltIns(); i++) 
     {
-        if (strcmp(args[0], builtInStr[i]) == 0) 
+        if (strcmp(args[0], builtInStr[i]) == 0) //check if the command matches a built-in
         {
-            status = (*builtInFunction[i])(args);
+            status = (*builtInFunction[i])(args); //call the built-in function
             is_builtin = true;
             break;
         }
     }
 
-    if (!is_builtin) 
+    if (!is_builtin) //not a built-in command
     {
         //Handle background processes for external commands
         bool background = false;
         int last = 0;
-        while(args[last] != NULL) last++;
-        if (last > 0 && strcmp(args[last-1], "&") == 0) 
+
+        while(args[last] != NULL) last++; //find the last argument
+
+        if (last > 0 && strcmp(args[last-1], "&") == 0) //if last argument is '&' it becomes a background process
         {
             background = true;
             args[last-1] = NULL;
         }
-        status = lshLaunch(args, background);
+
+        status = lshLaunch(args, background); //launch the external command
     }
     
     //Restore stdin and stdout & close files
@@ -296,7 +355,7 @@ int lshExecute(char **args)
     }
     if (saved_stdout != -1) 
     {
-        dup2(saved_stdout, STDOUT_FILENO);
+        dup2(saved_stdout, STDOUT_FILENO); 
         close(saved_stdout);
         close(out_fd);
     }
@@ -404,14 +463,4 @@ void historyFree(History *h)
 }
 
 
-
-
-void remove_redirection_tokens(char **args, int i) {
-    int j = i;
-    while (args[j+2] != NULL) {
-        args[j] = args[j+2];
-        j++;
-    }
-    args[j] = NULL;   // terminate
-}
 
