@@ -21,7 +21,7 @@ Make sure you're using a POSIX-compliant environment like Linux or WSL.
 
 <br>
 
-<h4>📦 current commands:</h4>
+<h4>📦 current commands/features:</h4>
 <ul>
 <li>cd - change directory</li>
 <li>help - list all commands</li>
@@ -32,12 +32,13 @@ Make sure you're using a POSIX-compliant environment like Linux or WSL.
 <li>history - prints the command history</li>
 <li>mkdir - make a directory</li>
 <li>rmdir - remove a directory</li>
+<li>Piping - (|)</li>
+<li>Background Execution - (&)</li>
 </ul>
 
 <hr>
 <h4> To be implemented </h4>
 <ul> 
-<li>Piping (|)</li>
 <li>Aliases ?(alias ll="ls -l")</li>
 </ul>
 <br>
