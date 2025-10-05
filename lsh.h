@@ -64,5 +64,7 @@ int lshMkdir(char **args);
 void lshBanner(); 
 
 
+void remove_redirection_tokens(char **args, int i);
+
 
 #endif // LSH_H
